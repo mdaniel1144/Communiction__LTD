@@ -1,0 +1,46 @@
+{% extends "main.html" %}
+
+{% block title %}search{% endblock %}
+
+{% block content %}
+    <form method="get" class="form-container">
+        {% csrf_token %}
+        <div class="form-label" style="width: 15%;">{{ form.title }}</div>
+            {{ form.type }}
+            {{ form.text }}
+            <button class="form-control-button"> {{ form.command }} </button>
+
+        {% if messages %}
+            <div class="message-container">
+                {% for message in messages %}
+                    {% if "error" in message.tags %}
+                            <ul>
+                                <li class="message-error">{{ message }}</li>
+                            </ul>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </form>
+    {% if results %}
+        <table class="form-table">
+            <thead class="form-table-thead">
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>City</th>
+                    <th>Job</th>
+                </tr>
+            </thead>
+            <tbody class="form-table-body">
+            {% for result in results %}
+                <tr>
+                    {% for col in result %}
+                        <td>{{ col}}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% endblock %}

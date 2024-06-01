@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %} Com {% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="script" href="{% static 'script/script.js' %}">
+</head>
+
+<body>
+  {% if Type == "Customer"%}
+    <div class="main-header">
+      <div class="hello-login">
+        Wellcome {{name}}, <a href="{% url 'login' %}">LogOut</a>
+      </div>
+      <ul>
+          <li class="main-header-option"><a href="{% url 'Search' %}">List Costumers</a></li>
+          <li class="main-header-option"><a href="{% url 'Add_Customer' %}">Add New Costumers</a></li>
+      </ul>
+    </div>
+  {% endif%}
+  <div>
+      {% block content %}
+      {% endblock %}
+  </div>
+</body>
+</html>
