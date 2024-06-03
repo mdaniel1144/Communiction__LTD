@@ -10,15 +10,11 @@
             {{ form.text }}
             <button class="form-control-button"> {{ form.command }} </button>
 
-        {% if messages %}
-            <div class="message-container">
-                {% for message in messages %}
-                    {% if "error" in message.tags %}
-                            <ul>
-                                <li class="message-error">{{ message }}</li>
-                            </ul>
-                    {% endif %}
-                {% endfor %}
+            {% if Error %}
+            <div class="message-container-error">
+                <ul>
+                    <li class="message-error">{{ Error }}</li>
+                </ul>
             </div>
         {% endif %}
     </form>

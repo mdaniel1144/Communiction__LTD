@@ -8,6 +8,11 @@ body{
     margin: auto;
 }
 
+a{
+    text-decoration: none;
+    color: black;
+}
+
 ul{
     padding: auto;
 }
@@ -136,7 +141,7 @@ ul{
     border-bottom-style: solid;
 }
 
-.message-container{
+.message-container-error{
     width: 70%;
     background-color: white;
     border-color: red;
@@ -152,4 +157,67 @@ ul{
     font-size: medium;
     font-family:Georgia, 'Times New Roman', Times, serif;
     text-align: inherit;
+}
+
+.hello-login{
+    position: absolute;
+    left: 20px;
+    top: 3px;
+    display: inline-block;
+    font-weight:700;
+}
+
+
+.setting-password, .setting-config-password{
+    border-color: white;
+    border-style: solid;
+    border-width: 2px;
+}
+
+.message-success{
+    display:block;
+    bottom: 30px;
+    margin: auto;
+    padding: 2px;
+    height: 50px;
+    width: max-content;
+    position: sticky;
+
+    border-color: #ddd;
+    border-style: double;
+    border-width: 2px;
+    border-radius: 20px;
+
+    background-color: white;
+    font-size: x-large;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bolder;
+    text-align: center;;
+    color:rgb(72, 165, 72);
+    text-align: center;
+}
+
+.message-success div{
+    position: relative;
+    top: 10px;
+}
+
+
+.form-control-digit {
+    position: relative;
+    width: 100px;
+    height: 200px;
+    margin: auto;
+    display: inline;
+
+    font-family: Lato;
+    font-size: 1.5em;
+    text-align: center;
+    box-sizing: border-box;
+    color: gray;
+}
+
+
+.form-control-digit:focus {
+    box-shadow: #04AA6D;
 }

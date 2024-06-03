@@ -87,5 +87,6 @@ class Customer(models.Model):
     
     def __str__(self): 
         return f"Email: {self.email}"
+    
 
  

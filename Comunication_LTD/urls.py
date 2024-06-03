@@ -22,9 +22,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.Login , name="login"),
     path('login', views.Login , name="login"),
+    path('logout', views.Logout , name="logout"),
+    path('forget_password', views.ForgetPassword , name="forget_password"),
     path('register/', views.Register , name="register"),
     path('Communication_LTD/Search', views.Search , name="Search"),
     path('Communication_LTD/Add_Customer', views.Add_Customer , name="Add_Customer"),
+    path('Communication_LTD/Setting', views.Setting , name="Setting"),
+
     
     #Check Server is Ok
     path('Hello_World', views.Hello_World , name="Hello_World"),

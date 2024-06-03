@@ -131,3 +131,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'app.User'
 
+
+#usin docker fake-smtp-server
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = '127.0.0.1'  # Replace with your SMTP server
+EMAIL_PORT = 1025  # Typically 587 for TLS, 465 for SSL
+EMAIL_USE_TLS = False  # Use TLS (True for port 587)
+EMAIL_USE_SSL = False  # Use SSL (True for port 465)
+EMAIL_HOST_USER = 'communicationltd@gmail.com'  # Replace with your email address
+EMAIL_HOST_PASSWORD = ''  # Replace with your email password

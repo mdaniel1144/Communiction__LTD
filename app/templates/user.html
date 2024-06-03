@@ -14,22 +14,17 @@
         </div>
         {% endfor %}
         <!--  Message For Erorr Submit-->
-        {% if messages %}
-        <div class="message-container">
-            {% for message in messages %}
-                {% if "error" in message.tags %}
-                        <ul>
-                            <li class="message-error">{{ message }}</li>
-                        </ul>
-                {% endif %}
-            {% endfor %}
-        </div>
+        {% if Error %}
+            <div class="message-container-error">
+                <ul>
+                    <li class="message-error">{{ Error }}</li>
+                </ul>
+            </div>
         {% endif %}
-
         <button type="submit" name="{{form.command}}" class="form-control-button">{{form.command}}</button>
 
         {% if Type == "Login" %}
-            <button type="submit" name="ForgetPassword" class="form-control-button">Forget Password</button>
+            <a class="form-control-button" href="{% url 'forget_password' %}">Forget Password</button>
             <a class="form-control-button" href="{% url 'register' %}">Register</a>
         {% endif %}
     </form>
