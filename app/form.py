@@ -51,7 +51,7 @@ class ForgetPasswordForm(forms.Form):
     command = "Save"
     email = forms.CharField(label="Email", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100 , required=True)
     password = forms.CharField(label="New Password",widget=forms.PasswordInput(attrs={'class': 'form-control'}) ,required=False) 
-    code = forms.IntegerField(label="Code",widget=forms.NumberInput(attrs={'class': 'form-control'}) ,required=False)
+    code = forms.CharField(label="Code",widget=forms.TextInput(attrs={'class': 'form-control'}) ,required=False)
 
 
 class SettingForm(forms.Form):
@@ -61,9 +61,10 @@ class SettingForm(forms.Form):
     confirmpassword = forms.CharField(label="Confirm password",widget=forms.PasswordInput(attrs={'class': 'form-control'}))    
     
 class SettingAdminForm(SettingForm):
+    title_config = "Config Password"
     lenght_min = forms.IntegerField(label="lenght_min",widget=forms.NumberInput(attrs={'class': 'form-control'}))
     lenght_max = forms.IntegerField(label="lenght_max",widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    contain= forms.CharField(label="contain",widget=forms.Textarea(attrs={'class': 'form-control'}))
+    contain= forms.CharField(label="contain",widget=forms.Textarea(attrs={'class': 'form-control-textarea'}))
     attempt= forms.IntegerField(label="attempt",widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    forbidden= forms.CharField(label="forbidden",widget=forms.Textarea(attrs={'class': 'form-control'}))
-    history = forms.CharField(label="history",widget=forms.Textarea(attrs={'class': 'form-control'}))
+    forbidden= forms.CharField(label="forbidden",widget=forms.Textarea(attrs={'class': 'form-control-textarea'}))
+    history = forms.IntegerField(label="history",widget=forms.NumberInput(attrs={'class': 'form-control'}))

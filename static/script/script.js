@@ -9,12 +9,3 @@ document.addEventListener("DOMContentLoaded", function() {
                 messageElement.remove();
         },  3000); 
 });
-
-document.addEventListener("DOMContentLoaded", function() {
-
-    const messageElement = document.querySelector(".message-container-error");
-        setTimeout(function() {
-            if(messageElement)
-                messageElement.remove();
-        },  3000); 
-});

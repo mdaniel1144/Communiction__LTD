@@ -2,6 +2,7 @@ from Comunication_LTD.settings import BASE_DIR
 from django.core.mail import send_mail
 import random
 import json
+import hashlib
 import re
 
 path = BASE_DIR/'static'/'config.txt'
@@ -58,11 +59,17 @@ def sendEmailVerifiction(email):
     
     code =  ''.join(random.choices('0123456789', k=6))
     
-    message = f"Hi {from_email} ,\n\nthis is you code reset: {code}."
+    # Convert the code to bytes (UTF-8 encoding)
+    code_bytes = code.encode('utf-8')
+    sha1_hash = hashlib.sha1()
+    sha1_hash.update(code_bytes)
+    code_with_SAH_1 = sha1_hash.hexdigest()
+    
+    message = f"Hi {from_email} ,\n\nthis is you code reset: {code_with_SAH_1}"
     
     try:
         print("sad assad ")
         send_mail(subject, message, from_email, recipient_list)
-        return code
+        return code_with_SAH_1
     except Exception as e:
         raise Exception(e)

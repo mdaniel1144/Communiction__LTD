@@ -19,6 +19,7 @@
         </div>
 
         <div class="setting-config-password">
+            <h2 class="form-title">{{form.title_config}}</h2>
             <div class="form-group">
                 <label for={{form.lenght_min.label}} class="form-label">{{form.lenght_min.label}}</label>
                 {{form.lenght_min}}
@@ -48,7 +49,7 @@
 
         <!--  Message For Erorr Submit-->
         {% if Error %}
-            <div class="message-container-error">
+            <div class="message-container">
                 <ul>
                     <li class="message-error">{{ Error }}</li>
                 </ul>

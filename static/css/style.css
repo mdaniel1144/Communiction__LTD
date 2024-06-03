@@ -79,6 +79,7 @@ ul{
     font-weight: 800;
     color:black;
     text-align: left;
+    vertical-align: top;
 }
 
 .form-group{
@@ -96,6 +97,19 @@ ul{
     padding-left: 3px;
     text-align: inherit;
     font-size: large;
+    width: 50%;
+}
+
+.form-control-textarea{
+    border-radius: 10px;
+    padding-left: 3px;
+    text-align: inherit;
+    font-size: large;
+
+    width: 50%;
+    height: 150px;
+    text-align: left;
+    resize: none;
 }
 .form-control-button{
     background-color: white;
@@ -141,7 +155,7 @@ ul{
     border-bottom-style: solid;
 }
 
-.message-container-error{
+.message-container{
     width: 70%;
     background-color: white;
     border-color: red;

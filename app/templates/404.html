@@ -10,7 +10,7 @@
     =======================*/
 
 
-    .page_404{ padding:40px 0; background:#fff; font-family: 'Arvo', serif;
+    .page_404{ padding:40px 0; background:#fff; font-family: 'Arvo', serif; margin: auto; position: relative;
     }
 
     .page_404  img{ width:100%;}
@@ -38,6 +38,8 @@
         display: inline-block;
         }
 	.contant_box_404{ margin-top:-50px;}
+
+    .container{margin: auto; align-items: center; text-align: center;}
     </style>
 
     <section class="page_404">
@@ -58,7 +60,7 @@
 		
 		    <p>the page you are looking for not avaible!</p>
 		
-		    <a href="" class="link_404">Go to Home</a>
+		    <a href="{% url 'login' %}" class="link_404">Go to Home</a>
 	    </div>
 		</div>
 		</div>

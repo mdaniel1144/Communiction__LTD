@@ -12,6 +12,8 @@ from .password import CheckPasswordIsOk ,sendEmailVerifiction
 import ast
 import datetime
 import json
+import html
+
 
 
 #Action For Register Method
@@ -20,12 +22,12 @@ def Register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             print("Trying Register...")
-            lastname = form.cleaned_data['lastname']
-            firstname = form.cleaned_data['firstname']
-            birthday = form.cleaned_data['birthday']
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            confirmpassword = form.cleaned_data['confirmpassword']
+            lastname = html.escape(form.cleaned_data['lastname'])
+            firstname = html.escape(form.cleaned_data['firstname'])
+            birthday = html.escape(form.cleaned_data['birthday'])
+            email = html.escape(form.cleaned_data['email'])
+            password = html.escape(form.cleaned_data['password'])
+            confirmpassword = html.escape(form.cleaned_data['confirmpassword'])
             try:
                 # Check if Costumer is all ready exist
                 SqlQuery = """SELECT email FROM app_user WHERE email = %s"""
@@ -83,8 +85,8 @@ def Login(request):
         if form.is_valid():            
             print("---------------")
             print("Trying Login...")
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            email = html.escape(form.cleaned_data['email'])
+            password = html.escape(form.cleaned_data['password'])
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
@@ -141,8 +143,8 @@ def Search(request):
         print("------------------\n    Searching...")
         if form.is_valid():
             #Cleaning Data After do Action
-            typeSearch = form.cleaned_data['type']
-            text = form.cleaned_data['text']
+            typeSearch = html.escape(form.cleaned_data['type'])
+            text = html.escape(form.cleaned_data['text'])
             try:
                 # Check if Costumer is all ready exist
                 SqlQuery = f"SELECT firstname || ' ' || lastname AS fullname, email, city, job FROM app_customer WHERE {typeSearch} LIKE '%{text}%'"
@@ -171,20 +173,20 @@ def Search(request):
 
 
 def Add_Customer(request):
+    print("dsad")
     if request.session.get('user_id'):
-        context = {}
         if request.method == 'POST':
             form = CustomerForm(request.POST)
             print("-----------------------\n   Trying Add New Costumers")
             if form.is_valid():
-                firstname = form.cleaned_data['firstname']
-                lastname = form.cleaned_data['lastname']
-                birthday = form.cleaned_data['birthday']
-                phone = form.cleaned_data['phone']
-                email = form.cleaned_data['email']
-                city = form.cleaned_data['city']
-                street = form.cleaned_data['street']
-                job = form.cleaned_data['job']
+                firstname = html.escape(form.cleaned_data['firstname'])
+                lastname = html.escape(form.cleaned_data['lastname'])
+                birthday = html.escape(form.cleaned_data['birthday'])
+                phone = html.escape(form.cleaned_data['phone'])
+                email = html.escape(form.cleaned_data['email'])
+                city = html.escape(form.cleaned_data['city'])
+                street = html.escape(form.cleaned_data['street'])
+                job = html.escape(form.cleaned_data['job'])
 
                 try:    
                     # Check if Costumer is all ready exist
@@ -244,13 +246,14 @@ def Setting(request):
 
             if form.is_valid():
                 #Cleaning Data After do Action
-                password = form.cleaned_data['password']
-                lenght_min = form.cleaned_data['lenght_min']
-                lenght_max = form.cleaned_data['lenght_max']
+                password = html.escape(form.cleaned_data['password'])
+                confirmpassword =  html.escape(form.cleaned_data['confirmpassword'])
+                lenght_min = html.escape(form.cleaned_data['lenght_min'])
+                lenght_max = html.escape(form.cleaned_data['lenght_max'])
                 contain = ast.literal_eval(form.cleaned_data['contain']) # -->convert to list
-                attempt = form.cleaned_data['attempt']
+                attempt = html.escape(form.cleaned_data['attempt'])
                 forbidden = ast.literal_eval(form.cleaned_data['forbidden']) # -->convert to list
-                history = form.cleaned_data['history']
+                history = html.escape(form.cleaned_data['history'])
             
                 try:
                     checkPassword = CheckPasswordIsOk(password)
@@ -261,11 +264,13 @@ def Setting(request):
                     config_info = {"lenght_min": lenght_min ,"lenght_max": lenght_max , "contain": contain ,"attempt": attempt ,"forbidden": forbidden, "history": history }
                     userId = request.session["user_id"]
 
-
-                    with open(path , "w") as file:
-                        upadted_config = json.dumps(config_info, indent=4) #indent => 4 spaces ' ' - more readable
-                        file.write(upadted_config)
-                        file.close()
+                    try:
+                        with open(path , "w") as file:
+                            upadted_config = json.dumps(config_info, indent=4) #indent => 4 spaces ' ' - more readable
+                            file.write(upadted_config)
+                            file.close()
+                    except:
+                        raise Exception("You are not in the correct format of config")
                         
                     # Check if Costumer is all ready exist
                     print(" Trying to upadte the info")
@@ -339,8 +344,7 @@ def ForgetPassword(request):
                     print(" Succseful upadte\n----------")
                     request.session.flush()
                     messages.success(request, "Succseful upadted setting of user")
-                    context = {'form' : None , 'Type' : "Login" , "Error" : None ,'message_success': 'New Password' }
-                    return render(request, 'user.html', context)
+                    return HttpResponseRedirect('/login')
                 else:
                     print("Sending to your mail code..")
                     code = sendEmailVerifiction(email)
@@ -368,7 +372,7 @@ def Logout(request):
     return HttpResponseRedirect("/login")
 
 #Action For Communication_LTD Method
-def Hello_World():
+def Hello_World(request):
      return HttpResponse("Hello World")
  
 def view_404(request):
