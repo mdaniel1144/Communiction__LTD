@@ -219,7 +219,7 @@ def Customer(request):
                         cursor.execute(SqlQuery, values)
                     print("Add New Customer \n----------------------")
                     form = CustomerForm()
-                    context = {'form' : form , 'Type' : 'User' , "Error" : None , 'message_success': "Add New Customer" }
+                    context = {'form' : form , 'Type' : 'User' , "Error" : None , 'message_success': f"Add {firstname} {lastname}", 'name': request.session['user_name'] }
                     return render(request, 'user.html', context)
             
                 except Exception as error:
