@@ -17,7 +17,7 @@
                 {{form.confirmpassword}}
             </div>
         </div>
-
+        {% if form.lenght_min %}
         <div class="setting-config-password">
             <h2 class="form-title">{{form.title_config}}</h2>
             <div class="form-group">
@@ -46,7 +46,7 @@
                 {{form.history}}
             </div>
         </div>
-
+        {% endif %}
         <!--  Message For Erorr Submit-->
         {% if Error %}
             <div class="message-container">

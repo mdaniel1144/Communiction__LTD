@@ -7,7 +7,7 @@ from Comunication_LTD.settings import BASE_DIR
 from .form import LoginForm , RegisterForm , CustomerForm , SearchForm , ForgetPasswordForm , SettingForm , SettingAdminForm
 from django.db import connection
 from django.contrib.auth.hashers import make_password
-from .models import User
+from .models import User , HistoryPassword
 from .password import CheckPasswordIsOk ,sendEmailVerifiction
 import ast
 import datetime
@@ -22,12 +22,12 @@ def Register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             print("Trying Register...")
-            lastname = html.escape(form.cleaned_data['lastname'])
-            firstname = html.escape(form.cleaned_data['firstname'])
-            birthday = html.escape(form.cleaned_data['birthday'])
-            email = html.escape(form.cleaned_data['email'])
-            password = html.escape(form.cleaned_data['password'])
-            confirmpassword = html.escape(form.cleaned_data['confirmpassword'])
+            lastname = html.escape(str(form.cleaned_data['lastname']))
+            firstname = html.escape(str(form.cleaned_data['firstname']))
+            birthday = html.escape(str(form.cleaned_data['birthday']))
+            email = html.escape(str(form.cleaned_data['email']))
+            password = html.escape(str(form.cleaned_data['password']))
+            confirmpassword = html.escape(str(form.cleaned_data['confirmpassword']))
             try:
                 # Check if Costumer is all ready exist
                 SqlQuery = """SELECT email FROM app_user WHERE email = %s"""
@@ -36,25 +36,32 @@ def Register(request):
                     results = cursor.fetchall()
                     if len(results) == 1:
                         raise Exception("This User is all ready exist")
+                    
+                if confirmpassword != password:
+                    raise Exception("There is no match between Password and confirmpassword")
                 
-                checkPassword = CheckPasswordIsOk(password)
+                checkPassword = CheckPasswordIsOk(password , None)
                 if checkPassword is not None:
                     raise Exception(checkPassword)
                 
                 # Define the SQL INSERT statement
                 current_datetime = datetime.datetime.now()
-                date_join = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
-                birthday = birthday.strftime('%Y-%m-%d %H:%M:%S')
+                date_join = current_datetime.strftime('%Y-%m-%d %H:%M:%S') 
+                #birthday = birthday.strftime('%Y-%m-%d %H:%M:%S')
                 hashed_password = make_password(password, salt=None, hasher='pbkdf2_sha256') #Its make Random salt
 
-                SqlQuery = """INSERT INTO app_user (firstname, lastname, birthday, email, password , is_superuser , is_active ,is_staff ,date_joined) 
+                SqlQuery_1 = """INSERT INTO app_user (firstname, lastname, birthday, email, password , is_superuser , is_active ,is_staff ,date_joined) 
                         VALUES (%s, %s, %s, %s, %s , %s ,%s , %s , %s)"""
-                # Define the values to insert
-                values = (firstname, lastname, birthday , email, hashed_password, False , True , False , date_join)
-
+                values_1 = (firstname, lastname, birthday , email, hashed_password, False , True , False , date_join)
+                
+                SqlQuery_2 = """INSERT INTO app_historypassword  (user_id, password, date_insert) 
+                        VALUES (%s, %s, %s)"""
                 # Execute the SQL statement
                 with connection.cursor() as cursor:
-                    cursor.execute(SqlQuery, values)
+                    cursor.execute(SqlQuery_1, values_1)
+                    userid = cursor.lastrowid
+                    values_2 = (userid, hashed_password, date_join)
+                    cursor.execute(SqlQuery_2, values_2)
                 print("""Add New User \n----------------------""")
                 return HttpResponseRedirect('/login')  # Redirect to the same page after successful addition
             except Exception as error:
@@ -68,7 +75,7 @@ def Register(request):
             print(f"{error}\n---------")
             context = {'form' : form , 'Error' : error}
             return render(request, 'user.html', context)                      
-    elif request.Method == "GET":
+    elif request.method == "GET":
         form = RegisterForm()
         context = {'form' : form ,'Error' : None}
         print("Building Empty Register Form..")
@@ -85,8 +92,8 @@ def Login(request):
         if form.is_valid():            
             print("---------------")
             print("Trying Login...")
-            email = html.escape(form.cleaned_data['email'])
-            password = html.escape(form.cleaned_data['password'])
+            email = html.escape(str(form.cleaned_data['email']))
+            password = html.escape(str(form.cleaned_data['password']))
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
@@ -102,7 +109,7 @@ def Login(request):
                 request.session['login_attempts'] = 0
                 
                 messages.success(request, 'Successfully logged in!')
-                return HttpResponseRedirect('/Communication_LTD/Add_Customer')  # Redirect to a success page.
+                return HttpResponseRedirect('/Communication_LTD/Customer')  # Redirect to a success page.
             else:
                 request.session.setdefault('login_attempts', 0)
                 request.session['login_attempts'] += 1   
@@ -113,11 +120,11 @@ def Login(request):
                         initialdata = json.loads(config_text)
                         file.close()
                         
-                    if(request.session['login_attempts'] >= initialdata['attempt']):
+                    if(request.session['login_attempts'] >= int(initialdata['attempt'])):
                         SqlQuery = "UPDATE app_user SET is_active = False WHERE email = %s"
                         with connection.cursor() as cursor:
                             cursor.execute(SqlQuery , [email])
-                        request.session['login_attempts'] = 0
+                        request.session.flush()
                         raise Exception("You over you attempts - user is lock")
 
                     error = "   Invalid Email or password."
@@ -143,8 +150,9 @@ def Search(request):
         print("------------------\n    Searching...")
         if form.is_valid():
             #Cleaning Data After do Action
-            typeSearch = html.escape(form.cleaned_data['type'])
-            text = html.escape(form.cleaned_data['text'])
+            typeSearch = html.escape(str(form.cleaned_data['type']))
+            text = html.escape(str(form.cleaned_data['text']))
+            
             try:
                 # Check if Costumer is all ready exist
                 SqlQuery = f"SELECT firstname || ' ' || lastname AS fullname, email, city, job FROM app_customer WHERE {typeSearch} LIKE '%{text}%'"
@@ -160,7 +168,7 @@ def Search(request):
             except Exception as error:
                 # Handle other exceptions
                 print(f"""   An error occurred: {error} \n-------------------""")
-                context = {'form' : form , 'Type' : 'User', "Error" : error}
+                context = {'form' : form , 'Type' : 'User', "Error" : error , 'name': request.session['user_name']}
                 messages.error(request,error)
                 return render(request, 'search.html', context) # Redirect to the same page after error   
         else:
@@ -172,21 +180,22 @@ def Search(request):
         return render(request, '404.html')
 
 
-def Add_Customer(request):
-    print("dsad")
+def Customer(request):
+    print("sad")
+    print(request.session.get('user_id'))
     if request.session.get('user_id'):
         if request.method == 'POST':
             form = CustomerForm(request.POST)
             print("-----------------------\n   Trying Add New Costumers")
             if form.is_valid():
-                firstname = html.escape(form.cleaned_data['firstname'])
-                lastname = html.escape(form.cleaned_data['lastname'])
-                birthday = html.escape(form.cleaned_data['birthday'])
-                phone = html.escape(form.cleaned_data['phone'])
-                email = html.escape(form.cleaned_data['email'])
-                city = html.escape(form.cleaned_data['city'])
-                street = html.escape(form.cleaned_data['street'])
-                job = html.escape(form.cleaned_data['job'])
+                firstname = html.escape(str(form.cleaned_data['firstname']))
+                lastname = html.escape(str(form.cleaned_data['lastname']))
+                birthday = html.escape(str(form.cleaned_data['birthday']))
+                phone = html.escape(str(form.cleaned_data['phone']))
+                email = html.escape(str(form.cleaned_data['email']))
+                city = html.escape(str(form.cleaned_data['city']))
+                street = html.escape(str(form.cleaned_data['street']))
+                job = html.escape(str(form.cleaned_data['job']))
 
                 try:    
                     # Check if Costumer is all ready exist
@@ -209,9 +218,9 @@ def Add_Customer(request):
                     with connection.cursor() as cursor:
                         cursor.execute(SqlQuery, values)
                     print("Add New Customer \n----------------------")
+                    form = CustomerForm()
                     context = {'form' : form , 'Type' : 'User' , "Error" : None , 'message_success': "Add New Customer" }
                     return render(request, 'user.html', context)
-                    #return HttpResponseRedirect('/Communication_LTD/Add_Customer')  # Redirect to the same page after successful addition
             
                 except Exception as error:
                     # Handle other exceptions
@@ -227,7 +236,7 @@ def Add_Customer(request):
         else:
             form = CustomerForm()
             context = {'form' : form , 'Type' : 'User' , 'Error' : None, 'message_success': None,  'name': request.session['user_name']}
-            print("Building Communication_LTD/Add Page..")
+            print("Building Communication_LTD/Customer Page..")
             return render(request, 'user.html', context)
     else:
         return render(request, '404.html')
@@ -245,39 +254,69 @@ def Setting(request):
                 form = SettingForm(request.POST)
 
             if form.is_valid():
-                #Cleaning Data After do Action
-                password = html.escape(form.cleaned_data['password'])
-                confirmpassword =  html.escape(form.cleaned_data['confirmpassword'])
-                lenght_min = html.escape(form.cleaned_data['lenght_min'])
-                lenght_max = html.escape(form.cleaned_data['lenght_max'])
-                contain = ast.literal_eval(form.cleaned_data['contain']) # -->convert to list
-                attempt = html.escape(form.cleaned_data['attempt'])
-                forbidden = ast.literal_eval(form.cleaned_data['forbidden']) # -->convert to list
-                history = html.escape(form.cleaned_data['history'])
-            
                 try:
-                    checkPassword = CheckPasswordIsOk(password)
-                    if checkPassword is not None:
-                        raise Exception(checkPassword)
+                    #Cleaning Data After do Action
+                    password = html.escape(str(form.cleaned_data['password']))
+                    confirmpassword =  html.escape(str(form.cleaned_data['confirmpassword']))
+
+        
+                    if request.session['user_IsAdmin']:
+                        lenght_min = html.escape(str(form.cleaned_data['lenght_min']))
+                        lenght_max = html.escape(str(form.cleaned_data['lenght_max']))
+                        contain = form.cleaned_data['contain']
+                        attempt = html.escape(str(form.cleaned_data['attempt']))
+                        forbidden = form.cleaned_data['forbidden']
+                        history = html.escape(str(form.cleaned_data['history']))
+                        
+                        if int(history) < 1 or int(lenght_max)<int(lenght_min) or int(lenght_min)<0:
+                            raise Exception("Your number is not logic")
+                        try:
+                        
+                            contain = ast.literal_eval(contain) # -->convert to list
+                            forbidden = ast.literal_eval(forbidden) # -->convert to list
+                            for i in range(len(contain)):
+                                if isinstance(contain[i] , str) == False:
+                                    raise Exception("it is not in a string value")
+                                else:
+                                    contain[i] = contain[i].replace("'",'').replace('"','')
+                            for i in range(len(forbidden)):
+                                if isinstance(forbidden[i] , str) == False:
+                                    raise Exception("it is not in a string value")
+                                else:
+                                    forbidden[i] = forbidden[i].replace("'",'').replace('"','')
+                            form.contain = contain
+                            form.forbidden = forbidden
+                        
+                            config_info = {"lenght_min": lenght_min ,"lenght_max": lenght_max , "contain": contain ,"attempt": attempt ,"forbidden": forbidden, "history": history }
+                            with open(path , "w") as file:
+                                upadted_config = json.dumps(config_info, indent=4) #indent => 4 spaces ' ' - more readable
+                                file.write(upadted_config)
+                                file.close()     
+                        except:
+                            raise Exception("You are not in the correct format of config")
+                        
+                        
+                    #--->Check password for user
+                    if confirmpassword != password:
+                        raise Exception("There is no match between Password and confirmpassword")
                     
                     hashed_password = make_password(password, salt=None, hasher='pbkdf2_sha256') #Its make Random salt
-                    config_info = {"lenght_min": lenght_min ,"lenght_max": lenght_max , "contain": contain ,"attempt": attempt ,"forbidden": forbidden, "history": history }
                     userId = request.session["user_id"]
-
-                    try:
-                        with open(path , "w") as file:
-                            upadted_config = json.dumps(config_info, indent=4) #indent => 4 spaces ' ' - more readable
-                            file.write(upadted_config)
-                            file.close()
-                    except:
-                        raise Exception("You are not in the correct format of config")
+                    
+                    if request.session['user_IsAdmin'] and password != "" or request.session['user_IsAdmin'] == False:
+                        checkPassword = CheckPasswordIsOk(password , userId)
+                        if checkPassword is not None:  
+                            raise Exception(checkPassword)
                         
                     # Check if Costumer is all ready exist
                     print(" Trying to upadte the info")
-                    SqlQuery = "UPDATE app_user SET password = %s WHERE id = %s"
+                    SqlQuery_1 = "UPDATE app_user SET password = %s WHERE id = %s"
+                    SqlQuery_2 = """INSERT INTO app_historypassword (user_id, password  ,date_insert) 
+                        VALUES (%s , %s , %s)"""
                     with connection.cursor() as cursor:
-                        cursor.execute(SqlQuery, [hashed_password, userId])
-                        
+                        cursor.execute(SqlQuery_1, [hashed_password, userId])
+                        cursor.execute(SqlQuery_2, [userId ,hashed_password , datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+                    
                     print(" Succseful upadte\n----------")
                     messages.success(request, "Succseful upadted setting of user")
                     context = {'form' : form , 'Type' : 'User' , "Error" : None ,'message_success': 'Succseful upadte' ,'name': request.session['user_name'] }
@@ -300,7 +339,6 @@ def Setting(request):
                     # Read the entire contents of the file
                     config_text = file.read()
                     initialdata = json.loads(config_text)
-                    print(initialdata)
                     file.close()
                 form = SettingAdminForm(initial=initialdata)
             else:
@@ -318,9 +356,9 @@ def ForgetPassword(request):
         form = ForgetPasswordForm(request.POST)
         
         if form.is_valid():
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            code = form.cleaned_data['code']
+            email = html.escape(str(form.cleaned_data['email']))
+            password = html.escape(str(form.cleaned_data['password']))
+            code = html.escape(str(form.cleaned_data['code']))
             
             try:
                 if(request.session["code"] != None):
@@ -329,7 +367,8 @@ def ForgetPassword(request):
                     if str(request.session["code"]) != str(code):
                         raise Exception("Your Code Is not Correct")
                     
-                    checkPassword = CheckPasswordIsOk(password)
+                    
+                    checkPassword = CheckPasswordIsOk(password , None)
                     if checkPassword is not None:
                         raise Exception(checkPassword)
                     
@@ -340,6 +379,13 @@ def ForgetPassword(request):
                     SqlQuery = "UPDATE app_user SET password = %s WHERE email = %s"
                     with connection.cursor() as cursor:
                         cursor.execute(SqlQuery, [hashed_password, email])
+                    
+                    print("Make reset all passowrd of this user")
+                    user_t = User.objects.get(email = email)
+                    collectionHistory = HistoryPassword.objects.filter(user = user_t)
+                    for historypassword in collectionHistory:
+                        historypassword.delete()
+
                         
                     print(" Succseful upadte\n----------")
                     request.session.flush()

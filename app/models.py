@@ -89,4 +89,7 @@ class Customer(models.Model):
         return f"Email: {self.email}"
     
 
- 
+class HistoryPassword(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    password = models.TextField(max_length=255)
+    date_insert = models.DateTimeField(default=timezone.now)

@@ -13,8 +13,8 @@ class RegisterForm(forms.Form):
     command = "Register"
     lastname = forms.CharField(label="Last Name", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     firstname = forms.CharField(label="First Name", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
-    birthday = forms.DateField(label="Birthday", widget=forms.TextInput(attrs={'class': 'form-control'}))
-    email = forms.CharField(label="Email", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
+    birthday = forms.DateField(label="Birthday", widget=forms.DateTimeInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control'}), max_length=100)
     password = forms.CharField(label="Password",widget=forms.PasswordInput(attrs={'class': 'form-control'}) , required=True)    
     confirmpassword = forms.CharField(label="Confirm Password",widget=forms.PasswordInput(attrs={'class': 'form-control'}) , required=True)    
 
@@ -33,7 +33,7 @@ class CustomerForm(forms.Form):
     firstname = forms.CharField(label="First Name:", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     birthday = forms.DateField(label="Birthday:", widget=forms.DateInput(attrs={'class': 'form-control'}))
     phone = forms.CharField(label="Phone Number:", widget=forms.TextInput(attrs={'class': 'form-control'}) ,max_length=100)
-    email = forms.CharField(label="Email:", widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
+    email = forms.EmailField(label="Email:", widget=forms.EmailInput(attrs={'class': 'form-control'}), max_length=100)
     city = forms.CharField(label="City:",widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     street = forms.CharField(label="Street:",widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=100)
     job = forms.ChoiceField(label="Job:", choices=CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
@@ -44,7 +44,7 @@ class SearchForm(forms.Form):
     command = "Search"
     CHOICES = [('Job', 'Job'), ('Email', 'Email'), ('City', 'City'),]
     type = forms.ChoiceField(label="Type:", choices=CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
-    text = forms.CharField(label="text",widget=forms.TextInput(attrs={'class': 'form-control'}))  
+    text = forms.CharField(label="text",widget=forms.TextInput(attrs={'class': 'form-control'}) , required=False)  
     
 class ForgetPasswordForm(forms.Form):
     title = "Forget Password"
@@ -60,8 +60,11 @@ class SettingForm(forms.Form):
     password = forms.CharField(label="Password",widget=forms.PasswordInput(attrs={'class': 'form-control'}))    
     confirmpassword = forms.CharField(label="Confirm password",widget=forms.PasswordInput(attrs={'class': 'form-control'}))    
     
-class SettingAdminForm(SettingForm):
+class SettingAdminForm(forms.Form):
     title_config = "Config Password"
+    command = "Save"
+    password = forms.CharField(label="Password",widget=forms.PasswordInput(attrs={'class': 'form-control'}) , required=False)    
+    confirmpassword = forms.CharField(label="Confirm password",widget=forms.PasswordInput(attrs={'class': 'form-control'}) , required=False)    
     lenght_min = forms.IntegerField(label="lenght_min",widget=forms.NumberInput(attrs={'class': 'form-control'}))
     lenght_max = forms.IntegerField(label="lenght_max",widget=forms.NumberInput(attrs={'class': 'form-control'}))
     contain= forms.CharField(label="contain",widget=forms.Textarea(attrs={'class': 'form-control-textarea'}))
