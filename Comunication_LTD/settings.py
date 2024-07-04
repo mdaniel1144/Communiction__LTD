@@ -140,3 +140,5 @@ EMAIL_USE_TLS = False  # Use TLS (True for port 587)
 EMAIL_USE_SSL = False  # Use SSL (True for port 465)
 EMAIL_HOST_USER = 'communicationltd@gmail.com'  # Replace with your email address
 EMAIL_HOST_PASSWORD = ''  # Replace with your email password
+
+SESSION_COOKIE_AGE = 3600 
