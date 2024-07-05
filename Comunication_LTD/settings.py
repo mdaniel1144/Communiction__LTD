@@ -142,3 +142,14 @@ EMAIL_HOST_USER = 'communicationltd@gmail.com'  # Replace with your email addres
 EMAIL_HOST_PASSWORD = ''  # Replace with your email password
 
 SESSION_COOKIE_AGE = 3600 
+
+
+
+#Username: admin@a.com
+#Password: Aa12345!
+
+#Username: daniel@n-k.or.il
+#Password: Aa12345!
+
+#Username: rotem@n-k.or.il
+#Password: Aa12345!
