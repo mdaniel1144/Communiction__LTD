@@ -68,16 +68,16 @@ def Register(request):
                 # Handle other exceptions
                 print(f"""   An error occurred: {error} \n-------------------""")
                 messages.error(request,error)
-                context = {'form' : form ,  'Error' : error}
+                context = {'form' : form ,'Type' : 'Register' ,  'Error' : error}
                 return render(request, 'user.html', context) # Redirect to the same page after error           
         else:
             error = "Your Values in InValid"
             print(f"{error}\n---------")
-            context = {'form' : form , 'Error' : error}
+            context = {'form' : form ,'Type' : 'Register' , 'Error' : error}
             return render(request, 'user.html', context)                      
     elif request.method == "GET":
         form = RegisterForm()
-        context = {'form' : form ,'Error' : None}
+        context = {'form' : form ,'Type' : 'Register' ,'Error' : None}
         print("Building Empty Register Form..")
         return render(request, 'user.html', context)
     else:
@@ -367,6 +367,13 @@ def ForgetPassword(request):
                     if str(request.session["code"]) != str(code):
                         raise Exception("Your Code Is not Correct")
                     
+                    
+                    SqlQuery = """SELECT email FROM app_user WHERE email = %s"""
+                    with connection.cursor() as cursor:
+                        cursor.execute(SqlQuery, [email])
+                        results = cursor.fetchall()
+                        if len(results) != 1:
+                            raise Exception("This User is Not exist")
                     
                     checkPassword = CheckPasswordIsOk(password , None)
                     if checkPassword is not None:
